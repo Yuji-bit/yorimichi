@@ -6,7 +6,7 @@ import { Plus, X } from "lucide-react";
 import type { Place } from "@/types";
 import PlacePanel from "@/components/map/PlacePanel";
 import AddPlaceForm from "@/components/map/AddPlaceForm";
-import { findOrCreatePlace } from "@/app/actions/places";
+import { findOrCreatePlace, getPlace } from "@/app/actions/places";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), {
   ssr: false,
@@ -55,6 +55,16 @@ export default function MapClient({ places, currentUserId }: Props) {
       setIsLoading(false);
     });
   }, [addMode]);
+
+  // 投稿後にパネルの場所データを最新に更新
+  const refreshSelectedPlace = useCallback(async (placeId: string) => {
+    const updated = await getPlace(placeId);
+    if (!updated) return;
+    setSelectedPlace(updated as Place);
+    setAllPlaces((prev) =>
+      prev.map((p) => (p.id === placeId ? (updated as Place) : p))
+    );
+  }, []);
 
   const handleMapClick = useCallback((location: ClickedLocation) => {
     setClickedLocation(location);
@@ -123,6 +133,7 @@ export default function MapClient({ places, currentUserId }: Props) {
             place={selectedPlace}
             currentUserId={currentUserId}
             onClose={() => setSelectedPlace(null)}
+            onPlaceUpdated={refreshSelectedPlace}
           />
         </div>
       )}

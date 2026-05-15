@@ -30,15 +30,21 @@ export default function HookForm({ placeId, isLoggedIn, onCancel, onSuccess }: P
       {isLoggedIn && (
         <>
           <div>
-            <label className="block text-xs font-medium text-stone-600 mb-1">種類</label>
-            <div className="flex gap-3">
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input type="radio" name="hookType" value="REGULAR" defaultChecked />
-                <span className="text-sm text-stone-700">よくいます（30日）</span>
+            <label className="block text-xs font-medium text-stone-600 mb-1">この場所との関係</label>
+            <div className="flex flex-col gap-2">
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input type="radio" name="hookType" value="REGULAR" defaultChecked className="mt-0.5" />
+                <div>
+                  <span className="text-sm text-stone-700 font-medium">よくいます</span>
+                  <span className="text-xs text-stone-400 ml-2">30日間表示</span>
+                </div>
               </label>
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input type="radio" name="hookType" value="RECENT" />
-                <span className="text-sm text-stone-700">最近行きました（7日）</span>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input type="radio" name="hookType" value="RECENT" className="mt-0.5" />
+                <div>
+                  <span className="text-sm text-stone-700 font-medium">最近行きました</span>
+                  <span className="text-xs text-stone-400 ml-2">7日間表示</span>
+                </div>
               </label>
             </div>
           </div>

@@ -8,7 +8,7 @@ import type { Place } from "@/types";
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 const SAGA_CENTER: [number, number] = [130.2988, 33.2635];
-const OSM_ZOOM_THRESHOLD = 13;
+const OSM_ZOOM_THRESHOLD = 12;
 
 type ClickedLocation = { lat: number; lng: number; address: string };
 type PoiInfo = { name: string; lat: number; lng: number; category?: string };
@@ -196,7 +196,7 @@ export default function MapView({ places, onPlaceClick, onPoiClick, addMode = fa
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/outdoors-v12",
       center: SAGA_CENTER,
-      zoom: 10,
+      zoom: 12,
     });
 
     map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
@@ -219,6 +219,7 @@ export default function MapView({ places, onPlaceClick, onPoiClick, addMode = fa
     }
 
     map.current.on("moveend", scheduleOsmUpdate);
+    map.current.on("zoomend", scheduleOsmUpdate);
     map.current.on("load", scheduleOsmUpdate);
 
     map.current.on("click", async (e) => {

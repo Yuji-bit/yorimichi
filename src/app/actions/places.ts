@@ -3,6 +3,24 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
+// 最新の場所データを1件取得（投稿後の再表示用）
+export async function getPlace(id: string) {
+  return prisma.place.findUnique({
+    where: { id },
+    include: {
+      hooks: {
+        where: { expiresAt: { gt: new Date() } },
+        include: { user: { select: { handleName: true, interestTags: true } } },
+        orderBy: { createdAt: "desc" },
+      },
+      wikiEdits: {
+        include: { user: { select: { handleName: true } } },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+}
+
 // 手動登録（場所を追加ボタン用）
 export async function createPlace(formData: FormData) {
   const name = formData.get("name") as string;

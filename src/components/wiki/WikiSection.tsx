@@ -10,9 +10,10 @@ import { saveWikiEdit } from "@/app/actions/wiki";
 type Props = {
   place: Place;
   currentUserId: string | null;
+  onSaved?: () => void;
 };
 
-export default function WikiSection({ place, currentUserId }: Props) {
+export default function WikiSection({ place, currentUserId, onSaved }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -25,6 +26,7 @@ export default function WikiSection({ place, currentUserId }: Props) {
       const result = await saveWikiEdit(formData);
       if (!result?.error) {
         setIsEditing(false);
+        onSaved?.();
       }
     });
   }

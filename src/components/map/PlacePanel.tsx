@@ -12,11 +12,12 @@ type Props = {
   place: Place;
   currentUserId: string | null;
   onClose: () => void;
+  onPlaceUpdated: (placeId: string) => Promise<void>;
 };
 
 type Tab = "hooks" | "wiki";
 
-export default function PlacePanel({ place, currentUserId, onClose }: Props) {
+export default function PlacePanel({ place, currentUserId, onClose, onPlaceUpdated }: Props) {
   const [tab, setTab] = useState<Tab>("hooks");
   const [showHookForm, setShowHookForm] = useState(false);
 
@@ -101,7 +102,10 @@ export default function PlacePanel({ place, currentUserId, onClose }: Props) {
                 placeId={place.id}
                 isLoggedIn={!!currentUserId}
                 onCancel={() => setShowHookForm(false)}
-                onSuccess={() => setShowHookForm(false)}
+                onSuccess={async () => {
+                  setShowHookForm(false);
+                  await onPlaceUpdated(place.id);
+                }}
               />
             )}
 
@@ -129,7 +133,7 @@ export default function PlacePanel({ place, currentUserId, onClose }: Props) {
                         : "bg-amber-50 text-amber-600"
                     }`}
                   >
-                    {hook.hookType === "REGULAR" ? "よくいます" : "最近行きました"}
+                    {hook.isAnonymous ? "通りすがり" : hook.hookType === "REGULAR" ? "よくいます" : "最近行きました"}
                   </span>
                 </div>
                 <p className="text-sm text-stone-900">{hook.message}</p>
@@ -159,6 +163,7 @@ export default function PlacePanel({ place, currentUserId, onClose }: Props) {
           <WikiSection
             place={place}
             currentUserId={currentUserId}
+            onSaved={() => onPlaceUpdated(place.id)}
           />
         )}
       </div>

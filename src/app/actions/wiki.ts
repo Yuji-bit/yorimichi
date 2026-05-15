@@ -23,6 +23,6 @@ export async function saveWikiEdit(formData: FormData) {
     data: { placeId, userId: user.id, content },
   });
 
-  revalidatePath(`/place/${placeId}`);
+  revalidatePath(`/map`);
   return { success: true };
 }
