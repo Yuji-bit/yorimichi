@@ -12,10 +12,12 @@ export default async function AdminPage() {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail || user.email !== adminEmail) redirect("/map");
 
+  // DB からデータ取得
   const [places, hooks, wikiEdits] = await Promise.all([
     prisma.place.findMany({
       include: {
-        _count: { select: { hooks: true, wikiEdits: true } },
+        hooks: { select: { id: true } },
+        wikiEdits: { select: { id: true } },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -36,28 +38,42 @@ export default async function AdminPage() {
   ]);
 
   // Date を文字列に変換してクライアントに渡す
-  const serialized = {
-    places: places.map((p) => ({
-      ...p,
-      createdAt: p.createdAt.toISOString(),
-      updatedAt: p.updatedAt.toISOString(),
-    })),
-    hooks: hooks.map((h) => ({
-      ...h,
-      expiresAt: h.expiresAt.toISOString(),
-      createdAt: h.createdAt.toISOString(),
-    })),
-    wikiEdits: wikiEdits.map((w) => ({
-      ...w,
-      createdAt: w.createdAt.toISOString(),
-    })),
-  };
+  const serializedPlaces = places.map((p) => ({
+    id: p.id,
+    name: p.name,
+    address: p.address,
+    lat: p.lat,
+    lng: p.lng,
+    tags: p.tags,
+    createdAt: p.createdAt.toISOString(),
+    hookCount: p.hooks.length,
+    wikiCount: p.wikiEdits.length,
+  }));
+
+  const serializedHooks = hooks.map((h) => ({
+    id: h.id,
+    message: h.message,
+    isAnonymous: h.isAnonymous,
+    hookType: h.hookType,
+    expiresAt: h.expiresAt.toISOString(),
+    createdAt: h.createdAt.toISOString(),
+    user: h.user,
+    place: h.place,
+  }));
+
+  const serializedWikiEdits = wikiEdits.map((w) => ({
+    id: w.id,
+    content: w.content,
+    createdAt: w.createdAt.toISOString(),
+    user: w.user,
+    place: w.place,
+  }));
 
   return (
     <AdminClient
-      places={serialized.places as any}
-      hooks={serialized.hooks as any}
-      wikiEdits={serialized.wikiEdits as any}
+      places={serializedPlaces}
+      hooks={serializedHooks}
+      wikiEdits={serializedWikiEdits}
     />
   );
 }

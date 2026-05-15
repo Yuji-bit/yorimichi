@@ -13,8 +13,9 @@ type Place = {
   lat: number;
   lng: number;
   tags: string[];
-  createdAt: Date;
-  _count: { hooks: number; wikiEdits: number };
+  createdAt: string;
+  hookCount: number;
+  wikiCount: number;
 };
 
 type Hook = {
@@ -22,8 +23,8 @@ type Hook = {
   message: string;
   isAnonymous: boolean;
   hookType: string;
-  expiresAt: Date;
-  createdAt: Date;
+  expiresAt: string;
+  createdAt: string;
   user: { handleName: string; email: string } | null;
   place: { name: string };
 };
@@ -31,7 +32,7 @@ type Hook = {
 type WikiEdit = {
   id: string;
   content: string;
-  createdAt: Date;
+  createdAt: string;
   user: { handleName: string; email: string };
   place: { name: string };
 };
@@ -158,8 +159,8 @@ export default function AdminClient({ places: initialPlaces, hooks: initialHooks
                       )}
                       <div className="flex items-center gap-3 mt-2 text-xs text-stone-400">
                         <span>📍 {place.lat.toFixed(4)}, {place.lng.toFixed(4)}</span>
-                        <span>💬 フック {place._count.hooks}件</span>
-                        <span>📝 Wiki {place._count.wikiEdits}件</span>
+                        <span>💬 フック {place.hookCount}件</span>
+                        <span>📝 Wiki {place.wikiCount}件</span>
                         <span>{format(new Date(place.createdAt), "M月d日登録", { locale: ja })}</span>
                       </div>
                     </div>
