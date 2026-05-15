@@ -27,6 +27,11 @@ type Props = {
   onMapClick?: (location: ClickedLocation) => void;
 };
 
+const OVERPASS_SERVERS = [
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
+];
+
 async function fetchOsmPois(bounds: mapboxgl.LngLatBounds): Promise<OsmElement[]> {
   const s = bounds.getSouth().toFixed(5);
   const w = bounds.getWest().toFixed(5);
@@ -34,7 +39,7 @@ async function fetchOsmPois(bounds: mapboxgl.LngLatBounds): Promise<OsmElement[]
   const e = bounds.getEast().toFixed(5);
 
   const query = `
-    [out:json][timeout:15];
+    [out:json][timeout:20];
     (
       node["name"]["amenity"~"restaurant|cafe|bar|fast_food|pub|izakaya|bakery|ice_cream|onsen|spa|library|cinema|community_centre"](${s},${w},${n},${e});
       node["name"]["shop"~"convenience|supermarket|bakery|clothes|books|gift|souvenir"](${s},${w},${n},${e});
@@ -45,17 +50,24 @@ async function fetchOsmPois(bounds: mapboxgl.LngLatBounds): Promise<OsmElement[]
     out body 100;
   `;
 
-  try {
-    const res = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      body: query,
-      signal: AbortSignal.timeout(15000),
-    });
-    const data = await res.json();
-    return (data.elements ?? []) as OsmElement[];
-  } catch {
-    return [];
+  for (const server of OVERPASS_SERVERS) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 20000);
+      const res = await fetch(server, {
+        method: "POST",
+        body: query,
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!res.ok) continue;
+      const data = await res.json();
+      return (data.elements ?? []) as OsmElement[];
+    } catch {
+      // 次のサーバーで再試行
+    }
   }
+  return [];
 }
 
 function getOsmName(tags: Record<string, string>): string {
@@ -220,7 +232,13 @@ export default function MapView({ places, onPlaceClick, onPoiClick, addMode = fa
 
     map.current.on("moveend", scheduleOsmUpdate);
     map.current.on("zoomend", scheduleOsmUpdate);
-    map.current.on("load", scheduleOsmUpdate);
+
+    // スタイルがすでに読み込み済みなら即実行、そうでなければloadイベントを待つ
+    if (map.current.isStyleLoaded()) {
+      scheduleOsmUpdate();
+    } else {
+      map.current.on("load", scheduleOsmUpdate);
+    }
 
     map.current.on("click", async (e) => {
       const { lng, lat } = e.lngLat;
