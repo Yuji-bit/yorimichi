@@ -23,6 +23,19 @@ export default function RegisterPage() {
           )}
           <div>
             <label className="block text-sm font-medium text-stone-700 mb-1">
+              招待コード
+            </label>
+            <input
+              name="inviteCode"
+              type="text"
+              required
+              className="w-full rounded-lg border border-stone-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="招待コードを入力"
+            />
+            <p className="mt-1 text-xs text-stone-400">主催者から受け取ったコードを入力してください</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-1">
               ハンドルネーム
             </label>
             <input

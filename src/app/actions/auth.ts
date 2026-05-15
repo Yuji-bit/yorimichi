@@ -29,10 +29,17 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const handleName = formData.get("handleName") as string;
+  const inviteCode = formData.get("inviteCode") as string;
   const interestTagsRaw = formData.get("interestTags") as string;
   const interestTags = interestTagsRaw
     ? interestTagsRaw.split(",").map((t) => t.trim()).filter(Boolean)
     : [];
+
+  // 招待コードチェック
+  const validCode = process.env.INVITE_CODE;
+  if (validCode && inviteCode !== validCode) {
+    return { error: "招待コードが正しくありません" };
+  }
 
   if (!handleName || handleName.length < 2) {
     return { error: "ハンドルネームは2文字以上必要です" };
